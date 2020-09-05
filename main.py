@@ -148,9 +148,11 @@ class ItemEnterEventListener(EventListener):
 
     def on_event(self, event, extension):
         code = event.get_data()
+        action = extension.preferences['action']
         copy_action = CopyToClipboardAction(code)
         copy_action.run()
-        self.paste()
+        if action == 'Auto-Insert':
+            self.paste()
 
 if __name__ == '__main__':
     EmojiExtension().run()
