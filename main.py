@@ -129,7 +129,7 @@ class ItemEnterEventListener(EventListener):
         self.perform_key_event("<Control>v", True, 100)
         self.perform_key_event("<Control>v", False, 0)
 
-    def perform_key_event(self, accelerator, press, delay=X.CurrentTime):
+    def perform_key_event(self, accelerator, press, delay=0):
         key, modifiers = Gtk.accelerator_parse(accelerator)
         keycode = xdisplay.keysym_to_keycode(key)
         event_type = X.KeyPress if press else X.KeyRelease
