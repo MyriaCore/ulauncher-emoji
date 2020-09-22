@@ -126,8 +126,8 @@ class KeywordQueryEventListener(EventListener):
 class ItemEnterEventListener(EventListener):
 
     def paste(self):
-        self.perform_key_event("<Control>v", True, 100)
-        self.perform_key_event("<Control>v", False, 0)
+        self.perform_key_event("<Shift>Insert", True, 100)
+        self.perform_key_event("<Shift>Insert", False, 0)
 
     def perform_key_event(self, accelerator, press, delay=0):
         key, modifiers = Gtk.accelerator_parse(accelerator)
