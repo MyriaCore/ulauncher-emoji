@@ -151,7 +151,7 @@ class KeywordQueryEventListener(EventListener):
                                              on_enter=ActionList([
                                                  CopyToClipboardAction(code),
                                                  PasteAction()
-                                             ])))
+                                             ]))
 
         return RenderResultListAction(items)
 
