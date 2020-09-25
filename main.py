@@ -4,24 +4,19 @@ import sqlite3
 from pprint import pprint
 from ulauncher.api.client.Extension import Extension
 from ulauncher.api.client.EventListener import EventListener
-from ulauncher.api.shared.event import KeywordQueryEvent, ItemEnterEvent
+from ulauncher.api.shared.event import KeywordQueryEvent
 from ulauncher.api.shared.item.ExtensionResultItem import ExtensionResultItem
 from ulauncher.api.shared.action.RenderResultListAction import RenderResultListAction
 from ulauncher.api.shared.action.CopyToClipboardAction import CopyToClipboardAction
 from ulauncher.api.shared.action.DoNothingAction import DoNothingAction
-from ulauncher.api.shared.action.ExtensionCustomAction import ExtensionCustomAction
-import gi
-gi.require_version('Gtk', '3.0')
-from gi.repository import Gtk, Gdk
-from Xlib import X, display
-from Xlib.ext import xtest
+from ulauncher.api.shared.action.ActionList import ActionList
+from PasteAction import PasteAction
 
 logger = logging.getLogger(__name__)
 extension_icon = 'images/icon.png'
 db_path = os.path.join(os.path.dirname(__file__), 'emoji.sqlite')
 conn = sqlite3.connect(db_path, check_same_thread=False)
 conn.row_factory = sqlite3.Row
-xdisplay = display.Display()
 
 def normalize_skin_tone(tone):
     """
@@ -41,7 +36,6 @@ class EmojiExtension(Extension):
     def __init__(self):
         super(EmojiExtension, self).__init__()
         self.subscribe(KeywordQueryEvent, KeywordQueryEventListener())
-        self.subscribe(ItemEnterEvent, ItemEnterEventListener())
         
         self.allowed_skin_tones = ["", "dark", "light", "medium", "medium-dark", "medium-light"]
 
@@ -119,38 +113,12 @@ class KeywordQueryEventListener(EventListener):
             if display_char: name += ' | %s' % code
 
             items.append(ExtensionResultItem(icon=icon, name=name,
-                                             on_enter=ExtensionCustomAction(code)))
+                                             on_enter=ActionList([
+                                                 CopyToClipboardAction(code),
+                                                 PasteAction()
+                                             ])))
 
         return RenderResultListAction(items)
-
-class ItemEnterEventListener(EventListener):
-
-    def paste(self):
-        self.perform_key_event("<Control>v", True, 100)
-        self.perform_key_event("<Control>v", False, 0)
-
-    def perform_key_event(self, accelerator, press, delay=X.CurrentTime):
-        key, modifiers = Gtk.accelerator_parse(accelerator)
-        keycode = xdisplay.keysym_to_keycode(key)
-        event_type = X.KeyPress if press else X.KeyRelease
-
-        if keycode != 0:
-            if modifiers & Gdk.ModifierType.CONTROL_MASK:
-                modcode = xdisplay.keysym_to_keycode(Gdk.KEY_Control_L)
-                xtest.fake_input(xdisplay, event_type, modcode, delay)
-
-            if modifiers & Gdk.ModifierType.SHIFT_MASK:
-                modcode = xdisplay.keysym_to_keycode(Gdk.KEY_Shift_L)
-                xtest.fake_input(xdisplay, event_type, modcode, delay)
-
-            xtest.fake_input(xdisplay, event_type, keycode, delay)
-            xdisplay.sync()
-
-    def on_event(self, event, extension):
-        code = event.get_data()
-        copy_action = CopyToClipboardAction(code)
-        copy_action.run()
-        self.paste()
 
 if __name__ == '__main__':
     EmojiExtension().run()
