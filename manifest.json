@@ -12,22 +12,11 @@
             "default_value": "em"
         },
         {
-            "id": "action",
-            "type": "select",
-            "name": "Action",
-            "description": "Choose the action to perform after picking an emoji",
-            "default_value": "Auto-Insert",
-            "options": [
-                "Auto-Insert",
-                "Copy"
-            ]
-        },
-        {
             "id": "emoji_style",
             "type": "select",
             "name": "Emoji Style",
             "description": "Choose the style of emojis you prefer",
-            "default_value": "twemoji",
+            "default_value":"twemoji",
             "options": [
                 "apple",
                 "twemoji",
@@ -40,7 +29,7 @@
             "type": "select",
             "name": "Fallback Emoji Style",
             "description": "Choose the style of emojis you prefer, if your first pick isn't available",
-            "default_value": "noto",
+            "default_value":"noto",
             "options": [
                 "apple",
                 "twemoji",
