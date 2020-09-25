@@ -123,16 +123,6 @@ class KeywordQueryEventListener(EventListener):
 
         return RenderResultListAction(items)
 
-class CopyToPrimarySelectionAction(CopyToClipboardAction):
-    """
-    Copy text to the clipboard
-    :param str text: text to copy
-    """
-    def run(self):
-        clipboard = Gtk.Clipboard.get(Gdk.SELECTION_PRIMARY)
-        clipboard.set_text(self.text, -1)
-        clipboard.store()
-
 class ItemEnterEventListener(EventListener):
 
     def paste(self):
@@ -159,11 +149,10 @@ class ItemEnterEventListener(EventListener):
     def on_event(self, event, extension):
         code = event.get_data()
         action = extension.preferences['action']
-        copy_action = CopyToPrimarySelectionAction(code)
+        copy_action = CopyToClipboardAction(code)
         copy_action.run()
         if action == 'Auto-Insert':
             self.paste()
 
 if __name__ == '__main__':
     EmojiExtension().run()
-
