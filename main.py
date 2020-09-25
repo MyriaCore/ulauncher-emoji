@@ -9,20 +9,12 @@ from ulauncher.api.shared.item.ExtensionResultItem import ExtensionResultItem
 from ulauncher.api.shared.action.RenderResultListAction import RenderResultListAction
 from ulauncher.api.shared.action.CopyToClipboardAction import CopyToClipboardAction
 from ulauncher.api.shared.action.DoNothingAction import DoNothingAction
-from ulauncher.api.shared.action.ActionList import ActionList
-from ulauncher.api.shared.action.BaseAction import BaseAction
-import gi
-gi.require_version('Gtk', '3.0')
-from gi.repository import Gtk, Gdk
-from Xlib import X, display as xdisplay
-from Xlib.ext import xtest
 
 logger = logging.getLogger(__name__)
 extension_icon = 'images/icon.png'
 db_path = os.path.join(os.path.dirname(__file__), 'emoji.sqlite')
 conn = sqlite3.connect(db_path, check_same_thread=False)
 conn.row_factory = sqlite3.Row
-display = xdisplay.Display()
 
 def normalize_skin_tone(tone):
     """
@@ -36,35 +28,6 @@ def normalize_skin_tone(tone):
     elif tone == "👌🏾 medium-dark": return 'medium-dark'
     elif tone == "👌🏿 dark": return 'dark'
     else: return None
-
-class PasteAction(BaseAction):
-    """
-    Simulate paste key press
-    """
-
-    def keep_app_open(self):
-        return False
-    
-    def perform_key_event(self, accelerator, press, delay=X.CurrentTime):
-        key, modifiers = Gtk.accelerator_parse(accelerator)
-        keycode = display.keysym_to_keycode(key)
-        event_type = X.KeyPress if press else X.KeyRelease
-
-        if keycode != 0:
-            if modifiers & Gdk.ModifierType.CONTROL_MASK:
-                modcode = display.keysym_to_keycode(Gdk.KEY_Control_L)
-                xtest.fake_input(display, event_type, modcode, delay)
-
-            if modifiers & Gdk.ModifierType.SHIFT_MASK:
-                modcode = display.keysym_to_keycode(Gdk.KEY_Shift_L)
-                xtest.fake_input(display, event_type, modcode, delay)
-
-            xtest.fake_input(display, event_type, keycode, delay)
-            display.sync()
-
-    def run(self):
-        self.perform_key_event("<Control>v", True, 100)
-        self.perform_key_event("<Control>v", False, 0)
 
 class EmojiExtension(Extension):
 
@@ -148,10 +111,7 @@ class KeywordQueryEventListener(EventListener):
             if display_char: name += ' | %s' % code
 
             items.append(ExtensionResultItem(icon=icon, name=name,
-                                             on_enter=ActionList([
-                                                 CopyToClipboardAction(code),
-                                                 PasteAction()
-                                             ]))
+                                             on_enter=CopyToClipboardAction(code)))
 
         return RenderResultListAction(items)
 
